@@ -12,12 +12,16 @@
 //    Utilizar el objeto exportado Conexion con su método begin(ssid,passw)
 //    para realizar la conexión
 //
-// -------------------------------------------------------------------------
+// Motivación:
+//   ConexionClass es una abstracción "fina" sobre WiFiClass, pero
+//   permite almacenar los datos de conexión.
+//   -------------------------------------------------------------------------
 //   Historia: + 18/12/2019 - Primera versión
 ////////////////////////////////////////////////////////////////////////////
 #ifndef CONEXION_HPP
 #define CONEXION_HPP
 
+#include "Arduino.h"
 #include "WiFi.h"
 
 class ConexionClass
@@ -26,11 +30,14 @@ public:
      // Conecta a una red WiFi con el SSID y contraseña indicada.
      //  - ssid: SSID de la red WiFi a conectar
      //  - password: contraseña de la red WiFi protegida
-     void begin(char *ssid, char *password);
-     
+     void begin(String ssid, String password);
+
+     // devuelve el SSID almacenado
+     String getSSID();
+
 private:
      // propiedades
-     char *ssid, *password;
+     String ssid, password;
 };
 
 // objeto interfaz

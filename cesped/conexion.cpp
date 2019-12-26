@@ -13,14 +13,15 @@
 #include "conexion.h"
 
 // Conecta a una red WiFi con el SSID y contraseña indicada.
-void ConexionClass::begin(char *ssid, char *password)
+void ConexionClass::begin(String ssid, String password)
 {
      this->ssid = ssid;
      this->password = password;
 
      WiFi.disconnect(true); // desconectar si previamente estaba conectado.
-     
-     WiFi.begin(this->ssid, this->password);
+
+     // WiFi.begin requiere char* acabados en null:
+     WiFi.begin(this->ssid.c_str(), this->password.c_str());
 
      while (WiFi.status() != WL_CONNECTED) {
           delay(500);
