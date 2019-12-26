@@ -20,6 +20,7 @@ void ConexionClass::begin(String ssid, String password)
 
      WiFi.disconnect(true); // desconectar si previamente estaba conectado.
 
+     WiFi.mode(AF_SPA); // modo estación (STA=Station), desactiva modo AP
      // WiFi.begin requiere char* acabados en null:
      WiFi.begin(this->ssid.c_str(), this->password.c_str());
 
@@ -28,7 +29,8 @@ void ConexionClass::begin(String ssid, String password)
           Serial.print(".");
      }
      Serial.println();
-     Serial.println("¡Conectado!");
+     Serial.print("¡Conectado! IP: ");
+     Serial.println(WiFi.localIP());
 };
 
 // objeto interfaz
