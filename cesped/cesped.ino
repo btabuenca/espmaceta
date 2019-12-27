@@ -7,7 +7,7 @@
 // Autor:      José L. Domenech
 // Descripción:
 //
-//   Ejemplo de crear una tarea.
+//   Ejemplo de conectar a una red WiFi.
 // -------------------------------------------------------------------------
 //   Historia: + 18/12/2019 - Primera versión
 ////////////////////////////////////////////////////////////////////////////
