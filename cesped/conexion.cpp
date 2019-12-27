@@ -7,6 +7,7 @@
 // Autor:      José L. Domenech
 // Descripción:
 //   Mantiene los datos de la conexión WiFi.
+//
 // -------------------------------------------------------------------------
 //   Historia: + 18/12/2019 - Primera versión
 ////////////////////////////////////////////////////////////////////////////
@@ -20,7 +21,7 @@ void ConexionClass::begin(String ssid, String password)
 
      WiFi.disconnect(true); // desconectar si previamente estaba conectado.
 
-     WiFi.mode(AF_SPA); // modo estación (STA=Station), desactiva modo AP
+     WiFi.mode(WIFI_MODE_STA); // modo estación (STA=Station), desactiva modo AP
      // WiFi.begin requiere char* acabados en null:
      WiFi.begin(this->ssid.c_str(), this->password.c_str());
 
