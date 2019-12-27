@@ -16,8 +16,6 @@
 
 #include "cliente_tb.h"
 
-#include <regex>
-
 // path de la URI de la api de telemetria
 String TB_API_TELEMETRIA = "/api/v1/_TOKEN_DISPOSITIVO_/telemetry/";
 // path de la URI de la api de alarmas 
@@ -40,8 +38,9 @@ bool ClienteTBClass::begin(String host, int puerto, String auth, Protocolo_t pro
 //  - token_dispositivo: identificador del dispositivo en el servicio
 //  - json: json a enviar. p.e.: "{'nombre': 'valor'}"
 //
-// devuelve el código HTTP devuelto por el servidor
-int ClienteTBClass::enviar_telemetria(String token_dispositivo, String json)
+// devuelve el par (std::pair) formado por el codigo HTTP y el contenido
+// devuelto por el servidor
+std::pair<int,String> ClienteTBClass::enviar_telemetria(String token_dispositivo, String json)
 {
      String uri_path = String(TB_API_TELEMETRIA);
      uri_path.replace("_TOKEN_DISPOSITIVO_", token_dispositivo);
@@ -54,7 +53,9 @@ int ClienteTBClass::enviar_telemetria(String token_dispositivo, String json)
      this->http.addHeader("X-Authorization", "Bearer " + this->auth);
      
      // enviar la petición y devolver el código
-     return this->http.POST(json);
+     int httpStatus = this->http.POST(json);
+
+     return std::make_pair(httpStatus, this->http.getString());
 };
 
 

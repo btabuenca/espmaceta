@@ -15,15 +15,19 @@
 //    + begin: cambia los parámetros de conexión: host, puerto, token de
 //    autenticación que se utilizaran al hacer las peticiones de la API
 //    + enviar_telemetria: envia un dato String con formato JSON.
-//   ClienteTB: Objeto interfaz
+//
+//
+//   Utilizar usando el objeto interfaz ClienteTB.begin(host, puerto, auth [, protocolo]);
+//
 // -------------------------------------------------------------------------
 //   Historia: + 18/12/2019 - Primera versión
 ////////////////////////////////////////////////////////////////////////////
 #ifndef CLIENTE_THINGSBOARD_HPP
 #define CLIENTE_THINGSBOARD_HPP
 
-#include "Arduino.h"
-#include "HTTPClient.h"
+#include "Arduino.h" // String
+#include "HTTPClient.h" // HTTPClient
+#include <utility> // std::pair
 
 enum class Protocolo_t { http, https };
 
@@ -44,8 +48,9 @@ public:
      //  - token_dispositivo: identificador del dispositivo en el servicio
      //  - json: json a enviar. p.e.: "{'nombre': 'valor'}"
      //
-     // devuelve el codigo HTTP devuelto por el servidor
-     int enviar_telemetria(String token_dispositivo, String json);
+     // devuelve el par (std::pair) formado por el codigo HTTP y el contenido
+     // devuelto por el servidor
+     std::pair<int,String> enviar_telemetria(String token_dispositivo, String json);
 private:
      // propiedades:
      Protocolo_t proto;
