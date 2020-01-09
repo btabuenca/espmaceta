@@ -19,7 +19,7 @@
 // path de la URI de la api de telemetria
 String TB_API_TELEMETRIA = "/api/v1/_TOKEN_DISPOSITIVO_/telemetry/";
 // path de la URI de la api de alarmas 
-String TB_API_ALARMAS = "/api/alarm/_DEVICE_TYPE_/_DEVICE_ID_/";
+String TB_API_ALARMAS    = "/api/alarm/_DEVICE_TYPE_/_DEVICE_ID_/";
 
 // Cambia los parámetros de conexión:
 //  - host: host del servicio

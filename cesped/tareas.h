@@ -29,9 +29,6 @@
 #ifndef TAREAS_HPP
 #define TAREAS_HPP
 
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-
 #include <functional> // std::function
 
 // memoria que se asigna a una tarea en su creación
