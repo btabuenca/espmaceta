@@ -10,10 +10,13 @@
 //
 // -------------------------------------------------------------------------
 //   Historia: + 18/12/2019 - Primera versión
+//             + 08/01/2020 - COrregir el manejo de eventos WiFi
 ////////////////////////////////////////////////////////////////////////////
 #include "conexion.h"
 
-void WiFiEstacionDesconectada()
+#include <esp_event_legacy.h>
+
+void WiFiEstacionDesconectada(WiFiEvent_t event, WiFiEventInfo_t info)
 {
      // si se ha detectado una desconexión...
      do {
@@ -36,9 +39,9 @@ int ConexionClass::conectar()
      while (WiFi.status() != WL_CONNECTED) {
           delay(500);
           Serial.print(".");
-     }
+     };
      
-     if Serial.available()
+     if (Serial.available())
      {
           Serial.println();
           Serial.print("¡Conectado! IP: ");
@@ -57,7 +60,7 @@ void ConexionClass::begin(String ssid, String password)
      this->conectar();
      // registrar una función que actue en caso de que ocurra una desconexión
      // IDEA tomada de: https://github.com/espressif/esp-idf/blob/master/docs/en/api-guides/wifi.rst#wifi-event-sta-disconnected
-     WiFi.on(WiFiEstacionDesconectada, WIFI_EVENT_STA_DISCONNECTED);
+     WiFi.onEvent(WiFiEstacionDesconectada, SYSTEM_EVENT_STA_DISCONNECTED);
 }
 
 // objeto interfaz

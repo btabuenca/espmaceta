@@ -24,8 +24,9 @@
 #ifndef CONEXION_HPP
 #define CONEXION_HPP
 
-#include "Arduino.h"
-#include "WiFi.h"
+#include <Arduino.h>
+
+#include <WiFi.h>
 
 // esperar 3 min. antes de reconectar
 const int TIEMPO_ESPERA_RECONEXION_MS = 3 * 60 * 1000;
