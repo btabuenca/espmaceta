@@ -19,6 +19,8 @@
 // Historia: + 07/01/2020 - Primera versión
 ////////////////////////////////////////////////////////////////////////////
 
+#include "ota.h"
+
 #include <ESPmDNS.h>
 #include <Update.h>
 
@@ -122,10 +124,10 @@ const char* serverIndex =
 //   - POST:/update - URI al que enviar (mediante POST (param:Update)) el
 //                    firmware que se cargará.
 //
-void configurarServidor(WebServer &server, char *host) {
+void configurarServidor(WebServer &server, String host) {
 
      /* usar mdns para publicar el nombre de nuestro host */
-  if (!MDNS.begin(host)) { //http://<host>.local
+  if (!MDNS.begin(host.c_str())) { //http://<host>.local
     Serial.println("Error setting up MDNS responder!");
     while (1) {
       delay(1000);
@@ -141,22 +143,22 @@ void configurarServidor(WebServer &server, char *host) {
 //   - GET:/update
 
 /* return index page which is stored in serverIndex */
-  server.on("/", HTTP_GET, []() {
+  server.on("/", HTTP_GET, [&server]() {
     server.sendHeader("Connection", "close");
     server.send(200, "text/html", loginIndex);
   });
   
-  server.on("/serverIndex", HTTP_GET, []() {
+  server.on("/serverIndex", HTTP_GET, [&server]() {
     server.sendHeader("Connection", "close");
     server.send(200, "text/html", serverIndex);
   });
   
   /*handling uploading firmware file */
-  server.on("/update", HTTP_POST, []() {
+  server.on("/update", HTTP_POST, [&server]() {
     server.sendHeader("Connection", "close");
     server.send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
     ESP.restart();
-  }, []() {
+  }, [&server]() {
     HTTPUpload& upload = server.upload();
     if (upload.status == UPLOAD_FILE_START) {
       Serial.printf("Update: %s\n", upload.filename.c_str());
@@ -184,5 +186,3 @@ void configurarServidor(WebServer &server, char *host) {
 //   delay(1);
 // }
 }
-
-

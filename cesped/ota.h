@@ -23,6 +23,8 @@
 #ifndef SERVIDOR_OTA_HPP
 #define SERVIDOR_OTA_HPP
 
+#include <Arduino.h> // String
+
 #include <WebServer.h> // TODO: usar HTTPS
 
 // Utilidad para configurar el servidor:
@@ -38,6 +40,6 @@
 //   - POST:/update - URI al que enviar (mediante POST (param:Update)) el
 //                    firmware que se cargará.
 //
-void configurarServidor(WebServer &server, char *host);
+void configurarServidor(WebServer &server, String host);
 
 #endif
