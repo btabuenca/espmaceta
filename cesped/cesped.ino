@@ -16,15 +16,15 @@
 ////////////////////////////////////////////////////////////////////////////
 //#include <iostream.h>   
 //#include <string.h> 
-#include "WiFi.h"
+#include "WiFi.h" // IPAddress
 
 #include "conexion.h"
 #include "ota.h"
 #include "tareas.h"
 
 const char* host = "esp32";
-const char* ssid = "SBC";
-const char* password = "sbc$18-maceta";
+const char* ssid = "";
+const char* password = "";
 static ptr_Tarea p_mi_tarea;
 int i=0;
 WebServer servidor(80);
@@ -34,21 +34,14 @@ int pinAzul=32;
 int pinRojo=33;
 int pinVerde=25;
 
-IPFija *conf_ip = new IPFija
-     (IPAddress(,,,),
-      IPAddress(,,,),
-      IPAddress(,,,),
-      IPAddress(,,,),
-      IPAddress(,,,));
-
 void setup()
 {
-        Serial.begin(9600);
-        delay(1000);
+     Serial.begin(9600);
+     delay(1000);
 
-        Conexion.begin(ssid, password, conf_ip);
-        configurarServidor(servidor, host);
-        servidor.begin();
+     Conexion.begin(ssid, password);
+     configurarServidor(servidor, host);
+     servidor.begin();
         
 
      p_mi_tarea = new Tarea(
