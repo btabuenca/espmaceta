@@ -50,7 +50,7 @@ std::pair<int,String> ClienteTBClass::enviar_telemetria(String token_dispositivo
      
      // indicar las cabeceras necesarias de la API:
      this->http.addHeader("Content-Type","application/json");
-     this->http.addHeader("X-Authorization", "Bearer " + this->auth);
+     // this->http.addHeader("X-Authorization", "Bearer " + this->auth);
      
      // enviar la petición y devolver el código
      int httpStatus = this->http.POST(json);
