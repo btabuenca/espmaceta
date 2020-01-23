@@ -18,22 +18,14 @@
 
 #include <ESP32.h>
 
+#include "configuracion.h"
+
 int valTemp = 0;
-
-const int BAUDIOS = 9600;
-
-const char *ssid = "";
-const char *pswd = "";
-
-const char *host = "";
-const int port = 80;
-
-const char *device = "";
 
 
 void setup()
 {
-        Serial.begin(BAUDIOS);
+        Serial.begin(SERIAL_BAUDIOS);
         delay(1000);
         
         Conexion.begin(ssid, pswd);
