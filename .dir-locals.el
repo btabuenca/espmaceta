@@ -9,4 +9,5 @@
  (c++-mode .
            ((c-file-style . "k&r")))
  (arduino-mode .
-               ((c-file-style . "k&r"))))
+               ((compile-command "arduino-cli compile --fqbn esp32:esp32:esp32 ../cesped")
+                (c-file-style . "k&r"))))
