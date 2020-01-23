@@ -34,12 +34,12 @@
 #include <functional> // std::function
 
 // memoria que se asigna a una tarea en su creación
-#define tarea_STACK_SIZE		configMINIMAL_STACK_SIZE
+#define tarea_STACK_SIZE		(10*configMINIMAL_STACK_SIZE)
 
 // tipos de la funciones que se ejecutan dentro de una tarea:
 typedef std::function<int(void)>      funcion_lectura_t;
-typedef std::function<char *(int)>    funcion_transformadora_t;
-typedef std::function<char *(char *)> funcion_envio_t;
+typedef std::function<const char *(int)>    funcion_transformadora_t;
+typedef std::function<const char *(const char *)> funcion_envio_t;
 
 // función básica que se ejecuta siempre como tarea - - -
 static void funcion_tareas(void* pvParameters);
