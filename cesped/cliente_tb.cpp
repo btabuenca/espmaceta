@@ -38,10 +38,12 @@ bool ClienteTBClass::begin(String host, int puerto, String auth, Protocolo_t pro
 //  - token_dispositivo: identificador del dispositivo en el servicio
 //  - json: json a enviar. p.e.: "{'nombre': 'valor'}"
 //
-// devuelve el par (std::pair) formado por el codigo HTTP y el contenido
-// devuelto por el servidor
-std::pair<int,String> ClienteTBClass::enviar_telemetria(String token_dispositivo, String json)
+// devuelve el par (std::pair) formado por el codigo HTTP o de error (<= 0) y el
+// contenido devuelto por el servidor.
+std::pair<int,String> *ClienteTBClass::enviar_telemetria(String token_dispositivo, String json)
 {
+     std::pair<int, String> *res;
+     
      String uri_path = String(TB_API_TELEMETRIA);
      uri_path.replace("_TOKEN_DISPOSITIVO_", token_dispositivo);
      
@@ -52,14 +54,16 @@ std::pair<int,String> ClienteTBClass::enviar_telemetria(String token_dispositivo
      this->http.addHeader("Content-Type","application/json");
      // this->http.addHeader("X-Authorization", "Bearer " + this->auth);
      
-     // enviar la petición y devolver el código
+     // enviar la petición y recibir el código HTTP (o error <= 0)
      int httpStatus = this->http.POST(json);
+     
+     res = new std::pair<int,String>(httpStatus, httpStatus > 0 ? this->http.getString() : "");
 
-     return std::make_pair(httpStatus, this->http.getString());
+     http.end();
+     
+     return res;
 };
 
 
 // objeto interfaz
 ClienteTBClass ClienteTB;
-
-

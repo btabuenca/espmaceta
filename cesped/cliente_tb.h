@@ -18,6 +18,8 @@
 //
 //
 //   Utilizar usando el objeto interfaz ClienteTB.begin(host, puerto, auth [, protocolo]);
+//   El token de autorización se puede obtener con:
+//     curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{"username":"tenant@thingsboard.org", "password":"tenant"}' 'http://THINGSBOARD_URL/api/auth/login'
 //
 // -------------------------------------------------------------------------
 //   Historia: + 18/12/2019 - Primera versión
@@ -25,9 +27,10 @@
 #ifndef CLIENTE_THINGSBOARD_HPP
 #define CLIENTE_THINGSBOARD_HPP
 
-#include "Arduino.h" // String
-#include "HTTPClient.h" // HTTPClient
 #include <utility> // std::pair
+#include <Arduino.h> // String
+#include <WiFi.h>
+#include <HTTPClient.h> // HTTPClient
 
 enum class Protocolo_t { http, https };
 
@@ -50,7 +53,7 @@ public:
      //
      // devuelve el par (std::pair) formado por el codigo HTTP y el contenido
      // devuelto por el servidor
-     std::pair<int,String> enviar_telemetria(String token_dispositivo, String json);
+     std::pair<int,String> *enviar_telemetria(String token_dispositivo, String json);
 private:
      // propiedades:
      Protocolo_t proto;
