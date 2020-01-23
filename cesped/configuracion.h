@@ -1,9 +1,10 @@
 const int SERIAL_BAUDIOS = 9600;
 
-const char *ssid = "";
-const char *pswd = "";
+char *ssid = "";
+char *pswd = "";
 
-const char *host = "";
+char *host = "";
 const int port = 80;
 
-const char *device = "";
+char *device = "";
+char *autorizacion = "";

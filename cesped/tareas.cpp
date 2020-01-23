@@ -66,8 +66,8 @@ static void funcion_tareas(void* pvParameters)
      {
           vTaskDelayUntil( &xLastWakeTime, frecuencia);
           int lectura = pxParameters->fl();
-          char *dato  = pxParameters->ft(lectura);
-          char *res = pxParameters->fe(dato);
+          const char *dato  = pxParameters->ft(lectura);
+          const char *res = pxParameters->fe(dato);
      }
      // si se sale del bucle: destruir la tarea
      if( *ptr_my_task_handle != NULL )
