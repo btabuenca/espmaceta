@@ -20,8 +20,6 @@
 
 int valTemp = 0;
 
-const int BAUDIOS = 9600;
-
 const char *ssid = "";
 const char *pswd = "";
 
@@ -33,7 +31,7 @@ const char *device = "";
 
 void setup()
 {
-        Serial.begin(BAUDIOS);
+        Serial.begin(9600);
         delay(1000);
         
         Conexion.begin(ssid, pswd);
@@ -43,6 +41,7 @@ void setup()
 
 void loop()
 {
+     
      valTemp = temprature_sens_read();
      ClienteTB.enviar_telemetria(device,"{\"temperature\": " + valTemp + "}");
      
