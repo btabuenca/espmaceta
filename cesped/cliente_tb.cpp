@@ -32,6 +32,8 @@ bool ClienteTBClass::begin(String host, int puerto, String auth, Protocolo_t pro
      this->host = host;
      this->puerto = puerto;
      this->auth = auth;
+
+     this->http_mutex = xSemaphoreCreateMutex(); // crea un mutex para el acceso exclusivo a http
 };
 
 // envia al dispositivo indentificado por token el dato JSON.
@@ -47,19 +49,28 @@ std::pair<int,String> *ClienteTBClass::enviar_telemetria(String token_dispositiv
      String uri_path = String(TB_API_TELEMETRIA);
      uri_path.replace("_TOKEN_DISPOSITIVO_", token_dispositivo);
      
-     // iniciar comunicación con el servidor
-     this->http.begin(this->host, this->puerto, uri_path);
+     // acceso exclusivo a this->http
+     if( xSemaphoreTake( this->http_mutex, pdMS_TO_TICKS(MAX_MS_ESPERA_MUTEX_HTTP)) == pdPASS ) {
      
-     // indicar las cabeceras necesarias de la API:
-     this->http.addHeader("Content-Type","application/json");
-     // this->http.addHeader("X-Authorization", "Bearer " + this->auth);
+          // iniciar comunicación con el servidor
+          this->http.begin(this->host, this->puerto, uri_path);
      
-     // enviar la petición y recibir el código HTTP (o error <= 0)
-     int httpStatus = this->http.POST(json);
+          // indicar las cabeceras necesarias de la API:
+          this->http.addHeader("Content-Type","application/json");
+          // this->http.addHeader("X-Authorization", "Bearer " + this->auth);
      
-     res = new std::pair<int,String>(httpStatus, httpStatus > 0 ? this->http.getString() : "");
+          // enviar la petición y recibir el código HTTP (o error <= 0)
+          int httpStatus = this->http.POST(json);
+     
+          res = new std::pair<int,String>(httpStatus, httpStatus > 0 ? this->http.getString() : "");
 
-     http.end();
+          http.end();
+
+          xSemaphoreGive( this->http_mutex );
+     
+     } else {
+          res = new std::pair<int,String>(999,String("No se pudo acceder al recurso this->http"));
+     }
      
      return res;
 };

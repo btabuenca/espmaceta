@@ -32,6 +32,8 @@
 #include <WiFi.h>
 #include <HTTPClient.h> // HTTPClient
 
+#define MAX_MS_ESPERA_MUTEX_HTTP 1000
+
 enum class Protocolo_t { http, https };
 
 // Clase para mantener los datos de conexión a un servicio ThingsBoard
@@ -62,6 +64,7 @@ private:
      String auth;
 
      HTTPClient http; // instantacia de HTTPClient
+     SemaphoreHandle_t http_mutex; // mutex para el acceso exclusivo a http
 };
 
 // objeto interfaz
