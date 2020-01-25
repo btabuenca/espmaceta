@@ -8,7 +8,7 @@
 // Descripción:
 //
 //   Ejemplo conectar a una red WiFi + leer de un sensor + enviar los datos a
-// Thingsboard
+// Thingsboard desde una Tarea de FreeRTOS
 // -------------------------------------------------------------------------
 // Historia: + 22/01/2020 - Primera versión
 ////////////////////////////////////////////////////////////////////////////
@@ -49,7 +49,7 @@ const char *json_temperature(int valor) {
 }
 
 const char *enviar_medida(const char *json) {
-     ClienteTB.begin(host, port, autorizacion);
+     ClienteTB.begin(tb_host, tb_port, autorizacion);
 
      std::pair<int,String> *res = ClienteTB.enviar_telemetria(device, json);
 
