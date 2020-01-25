@@ -7,105 +7,101 @@
 // Autor:      José L. Domenech
 // Descripción:
 //
-//   Ejemplo conectar a una red WiFi + leer de un sensor + enviar los datos a
-// Thingsboard
+//   Sistema de lectura de datos desde sensores y subida a un servicio Thingsboard.
+//
 // -------------------------------------------------------------------------
-// Historia: + 22/01/2020 - Primera versión
+//   Historia: + 08/01/2020 - Primera versión
+//             + 20/01/2020 - (Juan Luis+Victor) Lectura desde sensores
+//             + 25/01/2020 - Nueva versión
 ////////////////////////////////////////////////////////////////////////////
-
+//#include <iostream.h>   
+//#include <string.h> 
 #include "conexion.h"
+#include "ota.h"
 #include "tareas.h"
-#include "cliente_tb.h"
 
-#include "configuracion.h"
-
-// definición de la lectura del sensor de temperatura interno para Arduino.
-#ifdef __cplusplus
-extern "C" {
-#endif
- 
-        uint8_t temprature_sens_read();
- 
-#ifdef __cplusplus
-}
-#endif
- 
-uint8_t temprature_sens_read();
-
-int leer_temperatura_interna() {
-     return (uint8_t)temprature_sens_read();
-}
-
-const char *json_medida(String medida, int valor) {
-     String resString {""};
-     
-     resString = String("{\"" + medida + "\": ") + valor + "}";
-     
-     return resString.c_str();
-}
-
-const char *json_temperature(int valor) {
-  return json_medida("temperature", valor);
-}
-
-int leer_temperatura_mock1() {
-     return 10;
-}
-
-int leer_temperatura_mock2() {
-     return 25;
-}
-
-int leer_temperatura_mock3() {
-     return 30;
-}
-
-const char *enviar_medida(const char *json) {
-     std::pair<int,String> *res = ClienteTB.enviar_telemetria(device_token, json);
-
-//     Serial.println(json);
-     
-     return (char *)res->second.c_str();
-}
-
-ptr_Tarea sensor_temp_mock1, sensor_temp_mock2, sensor_temp_mock3;
+int i=0;
+WebServer servidor(80);
+const int pinGotas = 34;
+int pin=5;
+int pinAzul=32;
+int pinRojo=33;
+int pinVerde=25;
 
 void setup()
 {
-        Serial.begin(SERIAL_BAUDIOS);
+        Serial.begin(9600);
         delay(1000);
-
-        Serial.println("Iniciando");
         
-        Conexion.begin(ssid, pswd);
+        Conexion.begin(ssid, password);
+        configurarServidor(servidor, host);
+        servidor.begin();
+        
 
-        ClienteTB.begin(tb_host, tb_http_port, autorizacion);
+     p_mi_tarea = new Tarea(
+          "Prueba", // nombre
+          3000,     // periodo ms
+          1,        // prioridad
+          []() -> int { 
+                        int gotas=0;
+                        gotas = analogRead(pinGotas);
+                        Serial.println(pinGotas);
+                        Serial.println(gotas);
+                        return gotas; 
+                      }, // fun. lectora
+          [](int val) -> char* {
+                                 pinMode(pin, OUTPUT);
 
-        sensor_temp_mock1 = new Tarea("sensor_temp_mock1",
-                                      1000,
-                                      1, // la misma prioridad a todas
-                                      leer_temperatura_mock1,
-                                      json_temperature,
-                                      enviar_medida);
-
-        sensor_temp_mock2 = new Tarea("sensor_temp_mock2",
-                                      1000,
-                                      1, // la misma prioridad a todas
-                                      leer_temperatura_mock2,
-                                      json_temperature,
-                                      enviar_medida);
-
-        sensor_temp_mock3 = new Tarea("sensor_temp_mock3",
-                                      1000,
-                                      1, // la misma prioridad a todas
-                                      leer_temperatura_mock3,
-                                      json_temperature,
-                                      enviar_medida);
-
+                                 if(val<1000)
+                                  digitalWrite(pin,LOW);
+                                 else
+                                  digitalWrite(pin,HIGH);
+                                 return "Hola";
+                               }, // fun. trans.
+          [](char* val) -> char* { Serial.println(val); return val; }); // fun. envio
+     p_mi_tarea = new Tarea(
+          "LDR", // nombre
+          3000,     // periodo ms
+          2,        // prioridad
+          []() -> int { 
+                        int luz=0;
+                        luz = analogRead(35);
+                        Serial.print("Luz ");
+                        Serial.println(luz);
+                        return luz; 
+                      }, // fun. lectora
+          [](int val) -> char* {
+                                 pinMode(pinAzul, OUTPUT);
+                                 pinMode(pinVerde, OUTPUT);
+                                 pinMode(pinRojo, OUTPUT);
+                                 
+                                 if(val>3500)//4095 oscuridad total
+                                 {
+                                  digitalWrite(pinRojo,HIGH);
+                                  digitalWrite(pinAzul,LOW);
+                                  digitalWrite(pinRojo,LOW);
+                                 }
+                                 if(val>1000&&val<3499)
+                                 {
+                                  digitalWrite(pinRojo,LOW);
+                                  digitalWrite(pinAzul,HIGH);
+                                  digitalWrite(pinVerde,LOW);
+                                 }
+                                 if(val<999)
+                                 { 
+                                  digitalWrite(pinRojo,LOW);
+                                  digitalWrite(pinAzul,LOW);
+                                  digitalWrite(pinVerde,HIGH);
+                                 }
+                                 return "Hola";
+                               }, // fun. trans.
+          [](char* val) -> char* { Serial.println(val); return val; }); // fun. envio
 }
 
 void loop()
 {
-     Serial.print("IP: "); Serial.println(Conexion.getIP().toString());
-     delay(10000);
+  
+     servidor.handleClient();
+     delay(1);
+     
 }
