@@ -21,6 +21,7 @@
 //   Historia: + 18/12/2019 - Primera versión
 //             + 31/12/2019 - Añadir control de eventos de la conexión
 //             + 20/01/2020 - Añadir posibilidad de conf. IP estática
+//             + 25/01/2020 - Añadir recuperación de IP
 ////////////////////////////////////////////////////////////////////////////
 #ifndef CONEXION_HPP
 #define CONEXION_HPP
@@ -74,6 +75,8 @@ public:
      // Devuelve el SSID almacenado.
      String getSSID();
 
+     // Devuelve la IP obtenida
+     IPAddress getIP();
 private:
      // propiedades
      String ssid, password;

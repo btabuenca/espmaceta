@@ -12,6 +12,7 @@
 //   Historia: + 18/12/2019 - Primera versión
 //             + 08/01/2020 - Corregir el manejo de eventos WiFi
 //             + 20/01/2020 - Añadir posibilidad de conf. IP estática
+//             + 25/01/2020 - Añadir recuperación de IP
 ////////////////////////////////////////////////////////////////////////////
 #include "conexion.h"
 
@@ -94,6 +95,13 @@ void ConexionClass::begin(String ssid, String password, IPFija *ip_fija)
      // IDEA tomada de: https://github.com/espressif/esp-idf/blob/master/docs/en/api-guides/wifi.rst#wifi-event-sta-disconnected
      WiFi.onEvent(WiFiEstacionDesconectada, SYSTEM_EVENT_STA_DISCONNECTED);
 }
+
+// Devuelve la IP obtenida
+IPAddress ConexionClass::getIP()
+{
+     return WiFi.localIP();
+};
+
 
 // objeto interfaz
 ConexionClass Conexion;
