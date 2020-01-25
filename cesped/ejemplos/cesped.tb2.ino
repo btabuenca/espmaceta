@@ -41,7 +41,7 @@ void setup()
         
         Conexion.begin(ssid, pswd);
 
-        ClienteTB.begin(host, port, autorizacion);
+        ClienteTB.begin(tb_host, tb_port, autorizacion);
 }
 
 void loop()
@@ -49,6 +49,5 @@ void loop()
      valTemp = temprature_sens_read();
      valJSON = String("{\"temperature\": ") + valTemp + "}";
      ClienteTB.enviar_telemetria(device, valJSON);
-     delay(10000);
-     
+     delay(15000);     
 }
