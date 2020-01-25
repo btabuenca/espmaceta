@@ -8,3 +8,81 @@ Computador (SBC) 2019 de la Escuela Técnica Superior de Ingenieros de Sistemas
 Informáticos (ETSISI) de la Universidad Politécnica de Madrid (UPM)
 
 * Proyecto Arduino-ESP32
+
+* CONFIGURACIÓN
+Algunas opciones de configuración y otras definiciones interesantes:
+** configuracion.h
+#+BEGIN_SRC c++
+// velocidad a la que se comunicará con un puerto serie
+const int SERIAL_BAUDIOS = 9600;
+
+// datos de conexión WiFi ()
+char *ssid = ""; // SSID de la WiFi
+char *pswd = ""; // PASSWORD de la WiFi
+
+// datos de conexión a ThingsBoard
+char *tb_host = ""; // host en el que se aloja el servicio Thingsboard
+const int tb_http_port = 80; // puerto en el que se aloja el servicio http de Thingsboard
+
+// datos del dispositivo ThingsBoard que recoge las mediciones
+char *device_token = ""; // token del dispositivo 
+char *autorizacion = ""; // autorizacion (para lecturas)
+
+#+END_SRC
+
+** conexion.h
+#+BEGIN_SRC c++
+// esperar 3 min. antes de reconectar
+const int TIEMPO_ESPERA_RECONEXION_MS = 3 * 60 * 1000;
+#+END_SRC
+
+** tareas.h
+#+BEGIN_SRC c++
+// memoria que se asigna a una tarea en su creación
+#define tarea_STACK_SIZE		(10*configMINIMAL_STACK_SIZE)
+
+// tipos de la funciones que se ejecutan dentro de una tarea:
+typedef std::function<int(void)>                  funcion_lectura_t;
+typedef std::function<const char *(int)>          funcion_transformadora_t;
+typedef std::function<const char *(const char *)> funcion_envio_t;
+#+END_SRC
+
+** cliente_tb.h
+#+BEGIN_SRC c++
+#define MAX_MS_ESPERA_MUTEX_HTTP 1000
+
+enum class Protocolo_t { http, https };
+#+END_SRC
+
+** cliente_tb.cpp
+#+BEGIN_SRC c++
+
+// path de la URI de la api de telemetria
+String TB_API_TELEMETRIA = "/api/v1/_TOKEN_DISPOSITIVO_/telemetry/";
+// path de la URI de la api de alarmas 
+String TB_API_ALARMAS    = "/api/alarm/_DEVICE_TYPE_/_DEVICE_ID_/";
+
+#+END_SRC
+
+** ota.cpp
+#+BEGIN_SRC c++
+// página de login
+const char* loginIndex =
+
+// página de envío del fichero de firmware
+const char* serverIndex = 
+#+END_SRC
+* EJEMPLOS
+
+** ejemplos/cesped.conexion.ino
+Ejemplo de conexión a red WiFi
+** ejemplos/cesped.tarea.ino
+Ejemplo de creación, ejecución y parado de una tarea
+** ejemplos/cesped.tb1.ino
+Ejemplo de envío de datos a thingsboard
+** ejemplos/cesped.tb2.ino
+Ejemplo de lectura de sensor y envío de datos a Thingsboard
+** ejemplos/cesped.tb3.ino
+Ejemplo de lectura de sensor y envío de datos a Thingsboard desde una tarea
+** ejemplos/cesped.wifi_ota.ino
+Ejemplo de configuración de un servidor web para la actualización OTA
