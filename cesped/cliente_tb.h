@@ -65,6 +65,7 @@ private:
 
      HTTPClient http; // instantacia de HTTPClient
      SemaphoreHandle_t http_mutex; // mutex para el acceso exclusivo a http
+     // En FreeRTOS los mutexes poseen escalado de prioridad
 };
 
 // objeto interfaz

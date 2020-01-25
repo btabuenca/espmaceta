@@ -49,9 +49,7 @@ const char *json_temperature(int valor) {
 }
 
 const char *enviar_medida(const char *json) {
-     ClienteTB.begin(tb_host, tb_port, autorizacion);
-
-     std::pair<int,String> *res = ClienteTB.enviar_telemetria(device, json);
+     std::pair<int,String> *res = ClienteTB.enviar_telemetria(device_token, json);
 
      return (char *)res->second.c_str();
 }
@@ -65,7 +63,7 @@ void setup()
         
         Conexion.begin(ssid, pswd);
 
-        ClienteTB.begin(host, port, autorizacion);
+        ClienteTB.begin(tb_host, tb_http_port, autorizacion);
 
         sensor_temp_interna = new Tarea("sensor_temp_interna",
                                          10000,
