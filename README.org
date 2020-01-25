@@ -74,15 +74,17 @@ const char* serverIndex =
 #+END_SRC
 * EJEMPLOS
 
-** ejemplos/cesped.conexion.ino
+** cesped/ejemplos/cesped.conexion.ino
 Ejemplo de conexión a red WiFi
-** ejemplos/cesped.tarea.ino
+** cesped/ejemplos/cesped.tarea.ino
 Ejemplo de creación, ejecución y parado de una tarea
-** ejemplos/cesped.tb1.ino
+** cesped/ejemplos/cesped.tb1.ino
 Ejemplo de envío de datos a thingsboard
-** ejemplos/cesped.tb2.ino
+** cesped/ejemplos/cesped.tb2.ino
 Ejemplo de lectura de sensor y envío de datos a Thingsboard
-** ejemplos/cesped.tb3.ino
+** cesped/ejemplos/cesped.tb3.ino
 Ejemplo de lectura de sensor y envío de datos a Thingsboard desde una tarea
-** ejemplos/cesped.wifi_ota.ino
+** cesped/ejemplos/cesped.tb.stress.ino
+Prueba para enviar desde 3 tareas datos a Thingsboard
+** cesped/ejemplos/cesped.wifi_ota.ino
 Ejemplo de configuración de un servidor web para la actualización OTA

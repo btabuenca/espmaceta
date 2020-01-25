@@ -7,8 +7,7 @@
 // Autor:      José L. Domenech
 // Descripción:
 //
-//   Ejemplo conectar a una red WiFi + leer de un sensor + enviar los datos a
-// Thingsboard
+//   Prueba de stress para conectar a una red WiFi + leer de un sensor + enviar los datos a Thingsboard desde tres procesos.
 // -------------------------------------------------------------------------
 // Historia: + 22/01/2020 - Primera versión
 ////////////////////////////////////////////////////////////////////////////
