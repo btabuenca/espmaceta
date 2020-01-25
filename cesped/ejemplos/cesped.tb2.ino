@@ -8,7 +8,7 @@
 // Descripción:
 //
 //   Ejemplo conectar a una red WiFi + leer de un sensor + enviar los datos a
-// Thingsboard
+// Thingsboard utilizando el fichero de configuración (configuracion.h)
 // -------------------------------------------------------------------------
 // Historia: + 22/01/2020 - Primera versión
 ////////////////////////////////////////////////////////////////////////////
