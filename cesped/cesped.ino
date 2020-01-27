@@ -167,6 +167,9 @@ void setup()
 void loop()
 {
      servidor.handleClient();
-     Serial.print("IP: "); Serial.println(Conexion.getIP().toString());
-     delay(10000);
+     Serial.print("    MD5 SKETCH: "); Serial.println(ESP.getSketchMD5().toString());
+     Serial.print("            IP: "); Serial.println(Conexion.getIP().toString());
+     Serial.print("FREE HEAP MEM.: "); Serial.println(ESP.getFreeHeap());
+     Serial.println("===========================")
+//     delay(10000);
 }
