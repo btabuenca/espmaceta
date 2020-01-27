@@ -36,8 +36,10 @@
 
 #define MAX_MS_ESPERA_MUTEX_HTTP 1000
 
-typedef std::pair<int,String>  respuesta_tb_t; // respuesta de Thingsboard <CodigoHTTP,CuerpoRespuesta>
-typedef std::array<String,2>   cabecera_tb_t; // cabecera HTTP <clave,valor>
+// respuesta de Thingsboard <CodigoHTTP,CuerpoRespuesta>
+typedef std::pair<int,String>  respuesta_tb_t;
+// cabecera HTTP <clave,valor>
+typedef std::array<String,2>   cabecera_tb_t;
 
 // tipos de protocolo de envío (NOTA: sólo http tiene soporte en este proyecto)
 enum class Protocolo_t { http, https };
