@@ -52,6 +52,12 @@ typedef std::function<const char *(const char *)> funcion_envio_t;
 #define MAX_MS_ESPERA_MUTEX_HTTP 1000
 
 enum class Protocolo_t { http, https };
+
+// respuesta de Thingsboard <CodigoHTTP,CuerpoRespuesta>
+typedef std::pair<int,String>  respuesta_tb_t;
+// cabecera HTTP <clave,valor> 
+typedef std::array<String,2>   cabecera_tb_t; 
+
 #+END_SRC
 
 ** cliente_tb.cpp
