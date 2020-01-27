@@ -28,6 +28,7 @@
 #ifndef CLIENTE_THINGSBOARD_HPP
 #define CLIENTE_THINGSBOARD_HPP
 
+#include <array> // std::array
 #include <utility> // std::pair
 #include <Arduino.h> // String
 #include <WiFi.h>
@@ -35,7 +36,14 @@
 
 #define MAX_MS_ESPERA_MUTEX_HTTP 1000
 
+typedef std::pair<int,String>  respuesta_tb_t; // respuesta de Thingsboard <CodigoHTTP,CuerpoRespuesta>
+typedef std::array<String,2>   cabecera_tb_t; // cabecera HTTP <clave,valor>
+
+// tipos de protocolo de envío (NOTA: sólo http tiene soporte en este proyecto)
 enum class Protocolo_t { http, https };
+
+// utilidad para crear una respuesta_tb_t
+respuesta_tb_t make_respuesta_tb(int codigo, String respuesta);
 
 // Clase para mantener los datos de conexión a un servicio ThingsBoard
 class ClienteTBClass
@@ -57,8 +65,30 @@ public:
      // devuelve el par (std::pair) formado por el codigo HTTP (si hubo un error
      // <= 0) y el contenido devuelto por el servidor. Si no se pudo establecer
      // la conexión devuelve 999 en como código HTTP
-     std::pair<int,String> enviar_telemetria(String token_dispositivo, String json);
+     respuesta_tb_t enviar_telemetria(String token_dispositivo, String json);
 
+     // leer alarmas de un dispositivo desde el servicio Thingsboard
+     //  - tipo_dispositivo: tipo de dispositivo que contiene las alarmas
+     //  - id_dispositivo: identificador del dispositivo en el servicio
+     //  - cabeceras: vector de cabeceras que se incluirán, sirven para filtrar
+     //               las alarmas devueltas
+     //  - limite: número máximo de alarmas que se devolveran
+     //
+     // Devuelve el par (std::pair) formado por el codigo HTTP (si hubo un error
+     // <= 0) y el contenido devuelto por el servidor. Si no se pudo establecer
+     // la conexión devuelve 999 en como código HTTP
+     //
+     // Los parámetros admitidos (los mismos que la API thingsboard) son:
+     // - searchStatus
+     // - status
+     // - limit [OBLIGATORIO] (por eso lo incluyo con un valor por defecto=10)
+     // - startTime
+     // - endTime
+     // - ascOrder
+     // - offset
+     // - fetchOriginator
+     respuesta_tb_t leer_alarmas(String tipo_dispositivo, String id_dispositivo, std::vector<cabecera_tb_t> cabeceras, int limite=10);
+     
      // Destructor: libera los recursos utilizados:
      // - mutex
      ~ClienteTBClass();
