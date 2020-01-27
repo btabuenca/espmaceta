@@ -15,7 +15,8 @@
 //    + begin: cambia los parámetros de conexión: host, puerto, token de
 //    autenticación que se utilizaran al hacer las peticiones de la API
 //    + enviar_telemetria: envia un dato String con formato JSON.
-//
+//      Devuelve el resultado como estructura std::pair<CodigoHTTP,respuesta>.
+//    + ~ClienteTBClass: destructor, libera los recursos utilizados
 //
 //   Utilizar usando el objeto interfaz ClienteTB.begin(host, puerto, auth [, protocolo]);
 //   El token de autorización se puede obtener con:
@@ -53,9 +54,14 @@ public:
      //  - token_dispositivo: identificador del dispositivo en el servicio
      //  - json: json a enviar. p.e.: "{'nombre': 'valor'}"
      //
-     // devuelve el par (std::pair) formado por el codigo HTTP y el contenido
-     // devuelto por el servidor
-     std::pair<int,String> *enviar_telemetria(String token_dispositivo, String json);
+     // devuelve el par (std::pair) formado por el codigo HTTP (si hubo un error
+     // <= 0) y el contenido devuelto por el servidor. Si no se pudo establecer
+     // la conexión devuelve 999 en como código HTTP
+     std::pair<int,String> enviar_telemetria(String token_dispositivo, String json);
+
+     // Destructor: libera los recursos utilizados:
+     // - mutex
+     ~ClienteTBClass();
 private:
      // propiedades:
      Protocolo_t proto;

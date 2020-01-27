@@ -40,11 +40,10 @@ bool ClienteTBClass::begin(String host, int puerto, String auth, Protocolo_t pro
 //  - token_dispositivo: identificador del dispositivo en el servicio
 //  - json: json a enviar. p.e.: "{'nombre': 'valor'}"
 //
-// devuelve el par (std::pair) formado por el codigo HTTP o de error (<= 0) y el
-// contenido devuelto por el servidor.
-std::pair<int,String> *ClienteTBClass::enviar_telemetria(String token_dispositivo, String json)
+// Devuelve el par (std::pair) formado por el codigo HTTP o de error (<= 0) y el
+// contenido devuelto por el servidor. Si no se pudo establecer la conexión devuelve 999
+std::pair<int,String> ClienteTBClass::enviar_telemetria(String token_dispositivo, String json)
 {
-     std::pair<int, String> *res;
      
      String uri_path = String(TB_API_TELEMETRIA);
      uri_path.replace("_TOKEN_DISPOSITIVO_", token_dispositivo);
@@ -62,19 +61,29 @@ std::pair<int,String> *ClienteTBClass::enviar_telemetria(String token_dispositiv
           // enviar la petición y recibir el código HTTP (o error <= 0)
           int httpStatus = this->http.POST(json);
      
-          res = new std::pair<int,String>(httpStatus, httpStatus > 0 ? this->http.getString() : "");
+          std::pair<int,String> res = std::make_pair<int,String>(httpStatus, httpStatus > 0 ? this->http.getString() : "");
 
           http.end();
 
           xSemaphoreGive( this->http_mutex );
-     
+
+          return res;
      } else {
-          res = new std::pair<int,String>(999,String("No se pudo acceder al recurso this->http"));
+          std::pair<int,String> res = std::make_pair<int,String>(999,String("No se pudo acceder al recurso this->http"));
+
+          return res;
      }
-     
-     return res;
+
+     // no debería llegar aquí
+     return std::make_pair(666,"¡Entra en pánico. No deberías ver esto!");
 };
 
+// Destructor: libera los recursos utilizados:
+// - mutex
+ClienteTBClass::~ClienteTBClass()
+{
+     vSemaphoreDelete( this->http_mutex );     
+}
 
 // objeto interfaz
 ClienteTBClass ClienteTB;

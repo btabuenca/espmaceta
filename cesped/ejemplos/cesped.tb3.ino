@@ -49,9 +49,9 @@ const char *json_temperature(int valor) {
 }
 
 const char *enviar_medida(const char *json) {
-     std::pair<int,String> *res = ClienteTB.enviar_telemetria(device_token, json);
+     std::pair<int,String> res = ClienteTB.enviar_telemetria(device_token, json);
 
-     return (char *)res->second.c_str();
+     return (char *)res.second.c_str();
 }
 
 ptr_Tarea sensor_temp_interna;
