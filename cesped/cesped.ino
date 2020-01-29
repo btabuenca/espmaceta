@@ -24,6 +24,19 @@
 #include "configuracion.h"
 #include "config_tb.h"
 
+#define PRI_HUMEDAD_1 1
+#define PRI_HUMEDAD_2 2
+#define PRI_PESO      3
+#define PRI_GOTAS     4
+#define PRI_RELE      5
+
+// periodos de las tareas en ms
+#define PERIODO_HUMEDAD_1 1000
+#define PERIODO_HUMEDAD_2 1000
+#define PERIODO_PESO      1000
+#define PERIODO_GOTAS     1000
+#define PERIODO_RELE      1000
+
 WebServer servidor(http_service_port);
 
 void setup()
@@ -82,35 +95,36 @@ void lanzar_tareas() {
      ptr_Tarea sensorHumedad1, sensorHumedad2, sensorPeso,sensorGotas, estadoRele;
  
      sensorHumedad1 = new Tarea("sensorHumedad1",
-                                1000,
-                                1, // la misma prioridad a todas
+                                PERIODO_HUMEDAD_1,
+                                PRI_HUMEDAD_1,
                                 leerSensorHumedad1,
                                 json_humedad1,
                                 enviar_medida);
 
      sensorHumedad2 = new Tarea("sensorHumedad2",
-                                1000,
-                                1, // la misma prioridad a todas
+                                PERIODO_HUMEDAD_2,
+                                PRI_HUMEDAD_2,
                                 leerSensorHumedad2,
                                 json_humedad2,
                                 enviar_medida);
 
      sensorPeso = new Tarea("sensorPeso",
-                            1000,
-                            1, // la misma prioridad a todas
+                            PERIODO_PESO,
+                            PRI_PESO,
                             leerSensorPeso,
                             json_peso,
                             enviar_medida);
+     
      sensorGotas = new Tarea("sensorGotas",
-                             1000,
-                             1, // la misma prioridad a todas
+                             PERIODO_GOTAS,
+                             PRI_GOTAS,
                              leerSensorGotas,
                              json_gotas,
                              enviar_medida);
 
      estadoRele = new Tarea("estadoRele",
-                            1000,
-                            1, // la misma prioridad a todas
+                            PERIODO_RELE,
+                            PRI_RELE,
                             leerEstadoRele,
                             json_rele,
                             enviar_medida);
