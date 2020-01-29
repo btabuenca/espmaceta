@@ -15,161 +15,103 @@
 //             + 25/01/2020 - Nueva versión
 //             + 27/01/2020 - (Juan Luis+Victor) Añadidos todos los sensores
 ////////////////////////////////////////////////////////////////////////////
-//#include <iostream.h>   
-//#include <string.h> 
+
 #include "conexion.h"
 #include "ota.h"
 #include "tareas.h"
+#include "dispositivos.h"
 #include "cliente_tb.h"
 #include "configuracion.h"
+#include "config_tb.h"
 
-int i=0;
-WebServer servidor(80);
-const int pinGotas = 34;
-const int pinLDR=35;
-const int pinPeso = 39;
-const int pinRele=5;         // pin del rele
-const int pinHumedad1=32;
-const int pinHumedad2=33;
-const int pinBuzzer=22;
-
-const int pinAzul=16;
-const int pinRojo=17;
-const int pinVerde=4;
-
-const int pinEstadoRele=15;
-
-
-/*int leer_temperatura_interna() {
-     return (uint8_t)temprature_sens_read();
-}*/
-
-const char *json_medida(String medida, int valor) {
-     String resString {""};     
-     resString = String("{\"" + medida + "\": ") + valor + "}";
-     return resString.c_str();
-}
-
-const char *json_humedad1(int valor) {
-  return json_medida("humedad1", valor);
-}
-
-const char *json_humedad2(int valor) {
-  return json_medida("humedad2", valor);
-}
-
-const char *json_peso(int valor) {
-  return json_medida("peso", valor);
-}
-
-const char *json_gotas(int valor) {
-  return json_medida("gotas", valor);
-}
-
-const char *json_rele(int valor) {
-  return json_medida("rele", valor);
-}
-
-int leerSensorHumedad1() {
-     int humedad=analogRead(pinHumedad1);
-     return humedad;
-}
-
-int leerSensorHumedad2() {
-     int humedad=analogRead(pinHumedad2);
-     return humedad;
-}
-
-int leerSensorPeso() {
-     int peso=analogRead(pinPeso);
-     Serial.print("peso que lee el sensor: ");
-     Serial.println(peso);
-   //  peso = (peso*18.41)/1000;
-     return peso;
-}
-
-int leerSensorGotas() {
-     int gotas=analogRead(pinGotas);
-     return gotas;
-}
-
-int leerEstadoRele() {
-     int rele=digitalRead(pinEstadoRele);
-     return rele;
-}    
-
-const char *enviar_medida(const char *json) {
-     respuesta_tb_t res = ClienteTB.enviar_telemetria(device_token, json);
-
-//     Serial.println(json);
-     return (char *)res.second.c_str();
-}
-
-ptr_Tarea sensorHumedad1, sensorHumedad2, sensorPeso,sensorGotas, estadoRele;
-
+WebServer servidor(http_service_port);
 
 void setup()
 {
-        Serial.begin(SERIAL_BAUDIOS);
-        delay(1000);
-
-        pinMode(pinRele, OUTPUT);
-        pinMode(pinBuzzer, OUTPUT);
-        pinMode(pinAzul, OUTPUT);
-        pinMode(pinRojo, OUTPUT);
-        pinMode(pinVerde, OUTPUT);
-        pinMode(pinEstadoRele,INPUT);
+     // iniciar puerto de salida serie
+     Serial.begin(SERIAL_BAUDIOS);
+     delay(1000);
         
-        Serial.println("Iniciando");
-        
-        Conexion.begin(ssid, pswd);
-        configurarServidor(servidor, tb_host);
-        servidor.begin();
-        
-        ClienteTB.begin(tb_host, tb_http_port, autorizacion);
+     Serial.println("Iniciando");
 
-        sensorHumedad1 = new Tarea("sensorHumedad1",
-                                      1000,
-                                      1, // la misma prioridad a todas
-                                      leerSensorHumedad1,
-                                      json_humedad1,
-                                      enviar_medida);
+     // conectar a la red WiFi
+     Conexion.begin(ssid, pswd);
 
-        sensorHumedad2 = new Tarea("sensorHumedad2",
-                                      1000,
-                                      1, // la misma prioridad a todas
-                                      leerSensorHumedad2,
-                                      json_humedad2,
-                                      enviar_medida);
+     // configurar e iniciar el servidor HTTP conteniendo el servicio OTA
+     configurarServidor(servidor, tb_host);
+     servidor.begin();
 
-        sensorPeso = new Tarea("sensorPeso",
-                                      1000,
-                                      1, // la misma prioridad a todas
-                                      leerSensorPeso,
-                                      json_peso,
-                                      enviar_medida);
-        sensorGotas = new Tarea("sensorGotas",
-                                      1000,
-                                      1, // la misma prioridad a todas
-                                      leerSensorGotas,
-                                      json_gotas,
-                                      enviar_medida);
+     // configurar pines de los dispositivos
+     configurar_dispositivos();
+     
+     // configurar el endpoint del servicio Thingsboard
+     ClienteTB.begin(tb_host, tb_http_port, autorizacion);
 
-        estadoRele = new Tarea("estadoRele",
-                                      1000,
-                                      1, // la misma prioridad a todas
-                                      leerEstadoRele,
-                                      json_rele,
-                                      enviar_medida);
-
+     // lanzar las tareas
+     lanzar_tareas();
 }
 
 void loop()
 {
+     // tratar las peticiones del servidor HTTP
      servidor.handleClient();
-     Serial.print("    MD5 SKETCH: "); Serial.println(ESP.getSketchMD5().toString());
+     // mostrar información de depuración
+     Serial.print("    MD5 SKETCH: "); Serial.println(ESP.getSketchMD5());
      Serial.print("            IP: "); Serial.println(Conexion.getIP().toString());
      Serial.print("FREE HEAP MEM.: "); Serial.println(ESP.getFreeHeap());
-     Serial.println("===========================")
-//     delay(10000);
+     Serial.println("===========================");
+};
+
+/* Función que envía el dato formateado en json al servicio de Thingsboard
+ * configurado en ClienteTB 
+    - json: cadena que contiene el dato como objeto json
+
+   Devuelve el cuerpo de la respuesta recibida en la petición POST realizada al
+   enviar el dato.
+*/
+const char *enviar_medida(const char *json) {
+     respuesta_tb_t res = ClienteTB.enviar_telemetria(device_token, json);
+
+     return (char *)res.second.c_str();
+}
+
+
+// Función que lanza las tareas que se encargan de la lectura, obtención de la
+// estructura a enviar y el envío
+void lanzar_tareas() {
+     ptr_Tarea sensorHumedad1, sensorHumedad2, sensorPeso,sensorGotas, estadoRele;
+ 
+     sensorHumedad1 = new Tarea("sensorHumedad1",
+                                1000,
+                                1, // la misma prioridad a todas
+                                leerSensorHumedad1,
+                                json_humedad1,
+                                enviar_medida);
+
+     sensorHumedad2 = new Tarea("sensorHumedad2",
+                                1000,
+                                1, // la misma prioridad a todas
+                                leerSensorHumedad2,
+                                json_humedad2,
+                                enviar_medida);
+
+     sensorPeso = new Tarea("sensorPeso",
+                            1000,
+                            1, // la misma prioridad a todas
+                            leerSensorPeso,
+                            json_peso,
+                            enviar_medida);
+     sensorGotas = new Tarea("sensorGotas",
+                             1000,
+                             1, // la misma prioridad a todas
+                             leerSensorGotas,
+                             json_gotas,
+                             enviar_medida);
+
+     estadoRele = new Tarea("estadoRele",
+                            1000,
+                            1, // la misma prioridad a todas
+                            leerEstadoRele,
+                            json_rele,
+                            enviar_medida);
 }

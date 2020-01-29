@@ -14,9 +14,10 @@
 // Historia: + 18/12/2019 - Primera versión
 ////////////////////////////////////////////////////////////////////////////
 
-#include <vector>
 
 #include "cliente_tb.h"
+
+#include <vector>
 
 // path de la URI de la api de telemetria
 String TB_API_TELEMETRIA = "/api/v1/_TOKEN_DISPOSITIVO_/telemetry/";
