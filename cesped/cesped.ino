@@ -1,4 +1,4 @@
-/* -*- mode: arduino; coding: utf-8 -*- */
+/* -*- mode: arduino; coding: utf-8-unix -*- */
 //
 ////////////////////////////////////////////////////////////////////////////
 // Fichero:    cesped.ino
@@ -24,18 +24,18 @@
 #include "configuracion.h"
 #include "config_tb.h"
 
-#define PRI_HUMEDAD_1 1
+#define PRI_HUMEDAD_1 2
 #define PRI_HUMEDAD_2 2
-#define PRI_PESO      3
+#define PRI_PESO      1
 #define PRI_GOTAS     4
-#define PRI_RELE      5
+#define PRI_RELE      3
 
 // periodos de las tareas en ms
-#define PERIODO_HUMEDAD_1 1000
-#define PERIODO_HUMEDAD_2 1000
-#define PERIODO_PESO      1000
+#define PERIODO_HUMEDAD_1 4000
+#define PERIODO_HUMEDAD_2 3000
+#define PERIODO_PESO      6000
 #define PERIODO_GOTAS     1000
-#define PERIODO_RELE      1000
+#define PERIODO_RELE      2000
 
 WebServer servidor(http_service_port);
 
@@ -73,6 +73,7 @@ void loop()
      Serial.print("            IP: "); Serial.println(Conexion.getIP().toString());
      Serial.print("FREE HEAP MEM.: "); Serial.println(ESP.getFreeHeap());
      Serial.println("===========================");
+     delay(5000);
 };
 
 /* Función que envía el dato formateado en json al servicio de Thingsboard
