@@ -1,4 +1,4 @@
-/* -*- mode: arduino; coding: utf-8 -*- */
+/* -*- mode: arduino; coding: utf-8-unix -*- */
 //
 ////////////////////////////////////////////////////////////////////////////
 // Fichero:    configuracion.h
