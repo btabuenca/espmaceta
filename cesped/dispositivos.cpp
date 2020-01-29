@@ -1,4 +1,4 @@
-/* -*- mode: arduino; coding: utf-8 -*- */
+/* -*- mode: arduino; coding: utf-8-unix -*- */
 //
 ////////////////////////////////////////////////////////////////////////////
 // Fichero:    dispositivos.cpp
@@ -24,29 +24,37 @@
 
 int leerSensorHumedad1() {
      int humedad=analogRead(pinHumedad1);
+     Serial.print("Humendad 1:");
+     Serial.println(humedad);
      return humedad;
 }
 
 int leerSensorHumedad2() {
      int humedad=analogRead(pinHumedad2);
+     Serial.print("Humendad 2:");
+     Serial.println(humedad);
      return humedad;
 }
 
 int leerSensorPeso() {
      int peso=analogRead(pinPeso);
-     Serial.print("peso que lee el sensor: ");
+     Serial.print("peso:");
      Serial.println(peso);
-   //  peso = (peso*18.41)/1000;
+     peso = (peso*18.41)/1000;
      return peso;
 }
 
 int leerSensorGotas() {
      int gotas=analogRead(pinGotas);
+     Serial.print("Gotas:");
+     Serial.println(gotas);
      return gotas;
 }
 
 int leerEstadoRele() {
      int rele=digitalRead(pinEstadoRele);
+     Serial.print("rele:");
+     Serial.println(rele);
      return rele;
 }    
 
