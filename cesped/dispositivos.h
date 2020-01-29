@@ -1,4 +1,4 @@
-/* -*- mode: arduino; coding: utf-8 -*- */
+/* -*- mode: arduino; coding: utf-8-unix -*- */
 //
 ////////////////////////////////////////////////////////////////////////////
 // Fichero:    dispositivos.h
@@ -21,12 +21,15 @@
 
 #include <Arduino.h>
 
-const int pinGotas      = 34;
-const int pinLDR        = 35;
-const int pinPeso       = 39;
-const int pinRele       = 5;         // pin del rele
-const int pinHumedad1   = 32;
-const int pinHumedad2   = 33;
+
+const int pinLDR        = 36;
+const int pinHumedad1   = 39;
+const int pinHumedad2   = 34;
+const int pinGotas      = 35;
+const int pinPeso       = 32;
+const int pinRele       = 13;         // pin del rele
+
+
 const int pinBuzzer     = 22;
 
 const int pinAzul       = 16;
