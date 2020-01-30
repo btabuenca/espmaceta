@@ -126,15 +126,15 @@ const char* serverIndex =
 //
 void configurarServidor(WebServer &server, String host) {
 
-     /* usar mdns para publicar el nombre de nuestro host */
-  if (!MDNS.begin(host.c_str())) { //http://<host>.local
-    Serial.println("Error setting up MDNS responder!");
-    while (1) {
-      delay(1000);
-    }
-  }
+  //    /* usar mdns para publicar el nombre de nuestro host */
+  // if (!MDNS.begin(host.c_str())) { //http://<host>.local
+  //   Serial.println("Error setting up MDNS responder!");
+  //   while (1) {
+  //     delay(1000);
+  //   }
+  // }
 
-  Serial.println("mDNS responder started");
+//  Serial.println("mDNS responder started");
 
 // Configuración del servidor:
 // URIS del servidor:

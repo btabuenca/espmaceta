@@ -54,17 +54,19 @@ int ConexionClass::conectar()
      // WiFi.begin requiere char* acabados en null:
      WiFi.begin(this->ssid.c_str(), this->password.c_str());
 
+     Serial.print("Conectando ");
      while (WiFi.status() != WL_CONNECTED) {
           delay(500);
           Serial.print(".");
      };
      
-     if (Serial.available())
-     {
-          Serial.println();
-          Serial.print("¡Conectado! IP: ");
-          Serial.println(WiFi.localIP());
-     }
+     Serial.println();
+     Serial.print("¡Conectado! IP: ");
+     Serial.println(this->getIP());
+
+     // registrar una función que actue en caso de que ocurra una desconexión
+     // IDEA tomada de: https://github.com/espressif/esp-idf/blob/master/docs/en/api-guides/wifi.rst#wifi-event-sta-disconnected
+     WiFi.onEvent(WiFiEstacionDesconectada, SYSTEM_EVENT_STA_DISCONNECTED);
      
      return WiFi.status();
 }
@@ -76,9 +78,6 @@ void ConexionClass::begin(String ssid, String password)
      this->password = password;
 
      this->conectar();
-     // registrar una función que actue en caso de que ocurra una desconexión
-     // IDEA tomada de: https://github.com/espressif/esp-idf/blob/master/docs/en/api-guides/wifi.rst#wifi-event-sta-disconnected
-     WiFi.onEvent(WiFiEstacionDesconectada, SYSTEM_EVENT_STA_DISCONNECTED);
 }
 
 // Conecta a una red WiFi con el SSID y contraseña indicada.
@@ -89,11 +88,7 @@ void ConexionClass::begin(String ssid, String password, IPFija *ip_fija)
      this->password = password;
      this->conf_ip = ip_fija;
      
-     this->conectar();
-          
-     // registrar una función que actue en caso de que ocurra una desconexión
-     // IDEA tomada de: https://github.com/espressif/esp-idf/blob/master/docs/en/api-guides/wifi.rst#wifi-event-sta-disconnected
-     WiFi.onEvent(WiFiEstacionDesconectada, SYSTEM_EVENT_STA_DISCONNECTED);
+     this->conectar();          
 }
 
 // Devuelve la IP obtenida

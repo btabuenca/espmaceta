@@ -14,30 +14,48 @@
 //             + 20/01/2020 - (Juan Luis+Victor) Lectura desde sensores
 //             + 25/01/2020 - Nueva versión
 //             + 27/01/2020 - (Juan Luis+Victor) Añadidos todos los sensores
+//             + 30/01/2020 - Adaptación a MQTT
 ////////////////////////////////////////////////////////////////////////////
+
+#include <WiFi.h>
+#include <PubSubClient.h>
+#include <PubSubClientTools.h>
+
+#include <Thread.h>             // https://github.com/ivanseidel/ArduinoThread
+#include <ThreadController.h>
 
 #include "conexion.h"
 #include "ota.h"
 #include "tareas.h"
 #include "dispositivos.h"
-#include "cliente_tb.h"
 #include "configuracion.h"
 #include "config_tb.h"
 
-#define PRI_HUMEDAD_1 2
+#define PRI_HUMEDAD_1 3
 #define PRI_HUMEDAD_2 2
 #define PRI_PESO      1
-#define PRI_GOTAS     4
-#define PRI_RELE      3
+#define PRI_GOTAS     5
+#define PRI_RELE      4
 
 // periodos de las tareas en ms
-#define PERIODO_HUMEDAD_1 4000
-#define PERIODO_HUMEDAD_2 3000
-#define PERIODO_PESO      6000
-#define PERIODO_GOTAS     1000
-#define PERIODO_RELE      2000
+#define PERIODO_HUMEDAD_1 14000
+#define PERIODO_HUMEDAD_2 23000
+#define PERIODO_PESO      36000
+#define PERIODO_GOTAS     41000
+#define PERIODO_RELE      52000
+
+WiFiClient espClient;
+PubSubClient cliente_mqtt(tb_host, tb_mqtt_port, espClient);
+PubSubClientTools mqtt(cliente_mqtt);
+
+/* para ejecutar el publicador */
+//ThreadController threadControl = ThreadController();
+//Thread thread = Thread();
 
 WebServer servidor(http_service_port);
+
+// String de utilidad:
+const String s = "";
 
 void setup()
 {
@@ -45,7 +63,7 @@ void setup()
      Serial.begin(SERIAL_BAUDIOS);
      delay(1000);
         
-     Serial.println("Iniciando");
+     Serial.println("INICIANDO:");
 
      // conectar a la red WiFi
      Conexion.begin(ssid, pswd);
@@ -58,7 +76,7 @@ void setup()
      configurar_dispositivos();
      
      // configurar el endpoint del servicio Thingsboard
-     ClienteTB.begin(tb_host, tb_http_port, autorizacion);
+     configurarMQTT();
 
      // lanzar las tareas
      lanzar_tareas();
@@ -68,12 +86,20 @@ void loop()
 {
      // tratar las peticiones del servidor HTTP
      servidor.handleClient();
-     // mostrar información de depuración
-     Serial.print("    MD5 SKETCH: "); Serial.println(ESP.getSketchMD5());
-     Serial.print("            IP: "); Serial.println(Conexion.getIP().toString());
-     Serial.print("FREE HEAP MEM.: "); Serial.println(ESP.getFreeHeap());
-     Serial.println("===========================");
-     delay(5000);
+
+     if (!cliente_mqtt.loop())
+     {
+          // reconectar
+          if (cliente_mqtt.connect("MACETA-A", device_token, "", tb_topic, 0, 0, "{'desconexion': 'true'}")) {
+               Serial.println("re-connected");
+		
+               mqtt.subscribe(tb_topic,  topic1_subscriber);
+          } else {
+               Serial.println(s+"failed, rc="+cliente_mqtt.state());
+          }
+          
+     }
+     // threadControl.run();
 };
 
 /* Función que envía el dato formateado en json al servicio de Thingsboard
@@ -84,11 +110,45 @@ void loop()
    enviar el dato.
 */
 const char *enviar_medida(const char *json) {
-     respuesta_tb_t res = ClienteTB.enviar_telemetria(device_token, json);
+     Serial.print("enviar_medida(");
+     Serial.print(json);
+     Serial.println(")");
+     String json_envio = String(json);
+     Serial.println(json_envio);
+     if (cliente_mqtt.publish(tb_topic, json)) {
+          Serial.println(s + "Publicado con éxito (CLI: " + cliente_mqtt.state());
+     } else {
+          Serial.println(s + "No se consiguió publicar (CLI: " + cliente_mqtt.state());
+     }
 
-     return (char *)res.second.c_str();
+     return json;
 }
 
+void topic1_subscriber(String topic, String message) {
+     // TODO: hacer algo útil con los mensajes recibidos.
+     Serial.println(s+"Message arrived in function 1 ["+topic+"] "+message);
+}
+
+
+bool configurarMQTT() {
+  Serial.print(s+"Connecting to MQTT: "+tb_host+" ... ");
+  /* There are 3 QoS levels in MQTT: */
+  /*   At most once (0) */
+  /*   At least once (1) */
+  /*   Exactly once (2). */
+  if (cliente_mqtt.connect("MACETA-A", device_token, "", tb_topic, 0, 0, "{'desconexion': 'true'}")) {
+    Serial.println("connected");
+		
+    mqtt.subscribe(tb_topic,  topic1_subscriber);
+  } else {
+    Serial.println(s+"failed, rc="+cliente_mqtt.state());
+  }
+
+  /* // Enable Thread */
+  /* thread.onRun(publisher); */
+  /* thread.setInterval(2000); */
+  /* threadControl.add(&thread);      */
+}
 
 // Función que lanza las tareas que se encargan de la lectura, obtención de la
 // estructura a enviar y el envío

@@ -20,8 +20,6 @@
 
 #include <Arduino.h>
 
-#include "cliente_tb.h"
-
 int leerSensorHumedad1() {
      int humedad=analogRead(pinHumedad1);
      Serial.print("Humendad 1:");
@@ -59,15 +57,14 @@ int leerEstadoRele() {
 }    
 
 
+const String resString = "";     
 /* Función que devuelve una cadena que representa un objeto json:
     - medida: nombre del atributo
     - valor: valor del atributo
 
     Devuelve una cadena de la forma: {'medida': valor} */
 const char *json_medida(String medida, int valor) {
-     String resString {""};     
-     resString = String("{\"" + medida + "\": ") + valor + "}";
-     return resString.c_str();
+     return (resString + "{'" + medida + "': '" + valor + "'}").c_str();
 }
 
 const char *json_humedad1(int valor) {
