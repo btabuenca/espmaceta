@@ -23,26 +23,36 @@
 String TB_API_TELEMETRIA = "/api/v1/_TOKEN_DISPOSITIVO_/telemetry/";
 // path de la URI de la api de alarmas 
 String TB_API_ALARMAS    = "/api/alarm/_TIPO_DISPOSITIVO_/_ID_DISPOSITIVO_/";
+// Topic para publicar telemetría en Thingsboard
+String TB_API_TOPIC      = "v1/devices/me/telemetry";
 
 respuesta_tb_t make_respuesta_tb(int codigo, String respuesta)
 {
      return std::make_pair(codigo, respuesta);
-}
+};
 
 // Cambia los parámetros de conexión:
 //  - host: host del servicio
 //  - puerto: puerto del servicio
 //  - auth: token de autenticación
 //  - proto: protocolo usado: Protocolo_t::http ó Protocolo_t::https
-bool ClienteTBClass::begin(String host, int puerto, String auth, Protocolo_t proto)
-{
-     this->proto = proto;
-     this->host = host;
-     this->puerto = puerto;
-     this->auth = auth;
+     bool ClienteTBClass::begin(String host, int puerto, String auth, Protocolo_t proto)
+     {          
+          this->proto = proto;
+          this->host = host;
+          this->puerto = puerto;
+          this->auth = auth;
 
-     this->http_mutex = xSemaphoreCreateMutex(); // crea un mutex para el acceso exclusivo a http
-};
+          this->http_mutex = xSemaphoreCreateMutex(); // crea un mutex para el acceso exclusivo a http
+          switch (proto) {
+          case Protocolo_t::mqtt:
+               this->cliente_mqtt = new PubSubClient(host.c_str(), puerto, espClient);
+               this->mqtt = new PubSubClientTools(*(this->cliente_mqtt));
+          
+//               this->mqtt-connect("MACETA-A", device_token);
+               break; // case Protocolo_t::mqtt:
+          } // switch
+     };
 
 // envia al dispositivo indentificado por token el dato JSON.
 //  - token_dispositivo: identificador del dispositivo en el servicio
@@ -51,39 +61,58 @@ bool ClienteTBClass::begin(String host, int puerto, String auth, Protocolo_t pro
 // Devuelve el par (std::pair) formado por el codigo HTTP o de error (<= 0) y el
 // contenido devuelto por el servidor. Si no se pudo establecer la conexión devuelve 999
 respuesta_tb_t ClienteTBClass::enviar_telemetria(String token_dispositivo, String json)
-{
-     
-     String uri_path = String(TB_API_TELEMETRIA);
-     uri_path.replace("_TOKEN_DISPOSITIVO_", token_dispositivo);
-     
+{     
      // acceso exclusivo a this->http
-     if( xSemaphoreTake( this->http_mutex, pdMS_TO_TICKS(MAX_MS_ESPERA_MUTEX_HTTP)) == pdPASS ) {
+     if( xSemaphoreTake( this->http_mutex, pdMS_TO_TICKS(MAX_MS_ESPERA_MUTEX_HTTP)) == pdPASS )
+     {
+          switch (this->proto) {
+          case Protocolo_t::http:
+          {
+               String uri_path = String(TB_API_TELEMETRIA);
+               uri_path.replace("_TOKEN_DISPOSITIVO_", token_dispositivo);
+               
+               // iniciar comunicación con el servidor
+               this->http.begin(this->host, this->puerto, uri_path);
      
-          // iniciar comunicación con el servidor
-          this->http.begin(this->host, this->puerto, uri_path);
+               // indicar las cabeceras necesarias de la API:
+               this->http.addHeader("Content-Type","application/json");
+               // this->http.addHeader("X-Authorization", "Bearer " + this->auth);
      
-          // indicar las cabeceras necesarias de la API:
-          this->http.addHeader("Content-Type","application/json");
-          // this->http.addHeader("X-Authorization", "Bearer " + this->auth);
+               // enviar la petición y recibir el código HTTP (o error <= 0)
+               int httpStatus = this->http.POST(json);
      
-          // enviar la petición y recibir el código HTTP (o error <= 0)
-          int httpStatus = this->http.POST(json);
-     
-          respuesta_tb_t res = make_respuesta_tb(httpStatus, httpStatus > 0 ? this->http.getString() : "");
+               respuesta_tb_t res = make_respuesta_tb(httpStatus, httpStatus > 0 ? this->http.getString() : "");
 
-          http.end();
+               http.end();
+
+               return res;
+
+               break;
+          } // case: Protocolo_t::http
+          case Protocolo_t::mqtt:
+          {
+               if (!(this->mqtt->connected()))
+               {
+                    this->cliente_mqtt->connect("MACETA-A", token_dispositivo.c_str(), "");
+               }
+               this->mqtt->publish(TB_API_TOPIC, json);
+
+               respuesta_tb_t res = make_respuesta_tb(200, "MQTT-Pub:DONE");
+               return res; 
+          
+               break;
+          } // case Protocolo_t::mqtt:
+          }; // switch
 
           xSemaphoreGive( this->http_mutex );
-
-          return res;
      } else {
-          respuesta_tb_t res = make_respuesta_tb(999,String("No se pudo acceder al recurso this->http"));
+          respuesta_tb_t res = make_respuesta_tb(-999,String("No se pudo acceder al recurso this->http"));
 
           return res;
-     }
+     } // else mutex
 
      // no debería llegar aquí
-     return make_respuesta_tb(666,"¡Entra en pánico! ¡No deberías ver esto!");
+     return make_respuesta_tb(-666,"¡Entra en pánico! ¡No deberías ver esto!");
 };
 
 // leer alarmas de un dispositivo desde el servicio Thingsboard
@@ -153,7 +182,10 @@ respuesta_tb_t ClienteTBClass::leer_alarmas(String tipo_dispositivo, String id_d
 // - mutex
 ClienteTBClass::~ClienteTBClass()
 {
-     vSemaphoreDelete( this->http_mutex );     
+     delete this->cliente_mqtt;
+     delete this->mqtt;
+  
+     vSemaphoreDelete( this->http_mutex );
 }
 
 // objeto interfaz

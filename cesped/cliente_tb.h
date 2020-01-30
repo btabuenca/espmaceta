@@ -31,18 +31,22 @@
 #include <array> // std::array
 #include <utility> // std::pair
 #include <Arduino.h> // String
-#include <WiFi.h>
-#include <HTTPClient.h> // HTTPClient
+#include <WiFi.h> // WiFiClient
+// envío HTTP
+#include <HTTPClient.h>
+// envío MQTT
+#include <PubSubClient.h>
+#include <PubSubClientTools.h>
 
 #define MAX_MS_ESPERA_MUTEX_HTTP 1000
 
-// respuesta de Thingsboard <CodigoHTTP,CuerpoRespuesta>
+// respuesta HTTP de Thingsboard <CodigoHTTP,CuerpoRespuesta>
 typedef std::pair<int,String>  respuesta_tb_t;
 // cabecera HTTP <clave,valor>
 typedef std::array<String,2>   cabecera_tb_t;
 
-// tipos de protocolo de envío (NOTA: sólo http tiene soporte en este proyecto)
-enum class Protocolo_t { http, https };
+// tipos de protocolo de envío
+enum class Protocolo_t { http, mqtt };
 
 // utilidad para crear una respuesta_tb_t
 respuesta_tb_t make_respuesta_tb(int codigo, String respuesta);
@@ -55,10 +59,10 @@ public:
      //  - host: host del servicio
      //  - puerto: puerto del servicio
      //  - auth: token de autenticación
-     //  - proto: protocolo usado: "https" o "http"
+     //  - proto: protocolo usado (defecto mqtt)
      //
      // devuelve true si se consiguió la conexión
-     bool begin(String host, int puerto, String auth, Protocolo_t proto=Protocolo_t::http);
+     bool begin(String host, int puerto, String auth, Protocolo_t proto=Protocolo_t::mqtt);
 
      // envia al dispositivo indentificado por token el dato JSON.
      //  - token_dispositivo: identificador del dispositivo en el servicio
@@ -101,8 +105,16 @@ private:
      int puerto;
      String auth;
 
-     HTTPClient http; // instantacia de HTTPClient
-     SemaphoreHandle_t http_mutex; // mutex para el acceso exclusivo a http
+     // instantacia de HTTPClient
+     HTTPClient http;
+     // instancia de PubSubClientTools
+     WiFiClient espClient;
+     PubSubClient *cliente_mqtt;
+     // las funciones de alto nivel se usarán através de este objeto:
+     PubSubClientTools *mqtt;
+
+     // mutex para el acceso exclusivo al cliente de envío
+     SemaphoreHandle_t http_mutex; 
      // En FreeRTOS los mutexes poseen escalado de prioridad
 };
 
