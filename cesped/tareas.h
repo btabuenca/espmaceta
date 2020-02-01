@@ -29,16 +29,34 @@
 #ifndef TAREAS_HPP
 #define TAREAS_HPP
 
-#include <Arduino.h>
+#include <Arduino.h> // String
 
 #include <functional> // std::function
 
 // memoria que se asigna a una tarea en su creación
 #define tarea_STACK_SIZE		(10*configMINIMAL_STACK_SIZE)
 
+// cola de mensajes mqtt
+#define TAMANO_COLA_MQTT 20
+// máximo tiempo de espera (en Ticks) (portMAX_DELAY para infinito, MS=)
+#define QUEUE_MQTT_MAXIMO_TICKS_ESPERA portMAX_DELAY
+
+// clase que contiene el mensaje a enviar mediante MQTT
+struct mensaje_mqtt {
+     // constructor:
+     mensaje_mqtt(String mensaje_json);
+     
+     // propiedades:
+     // topic no es necesario
+     String mensaje_json;
+};
+
+// interfaz a la cola de tareas
+extern QueueHandle_t queue_mqtt;
+
 // tipos de la funciones que se ejecutan dentro de una tarea:
-typedef std::function<int(void)>      funcion_lectura_t;
-typedef std::function<const char *(int)>    funcion_transformadora_t;
+typedef std::function<int(void)>                  funcion_lectura_t;
+typedef std::function<const char *(int)>          funcion_transformadora_t;
 typedef std::function<const char *(const char *)> funcion_envio_t;
 
 // función básica que se ejecuta siempre como tarea - - -

@@ -15,6 +15,16 @@
 #include "tareas.h"
 #include <memory> // std::unique_ptr
 
+//     - - - INTERFAZ Cola de Mensajes MQTT - - -
+// cola de mensajes mqtt
+#define TAMANO_COLA_MQTT 20
+
+QueueHandle_t queue_mqtt = xQueueCreate( TAMANO_COLA_MQTT, sizeof( mensaje_mqtt ) );;
+
+mensaje_mqtt::mensaje_mqtt(String mensaje_json)
+     :mensaje_json{mensaje_json}
+{};
+
 //     - - - INTERFAZ Tarea - - -
 // constructor
 Tarea::Tarea(char *nombre, unsigned long ms_espera, int prioridad, funcion_lectura_t fl, funcion_transformadora_t ft, funcion_envio_t fe)

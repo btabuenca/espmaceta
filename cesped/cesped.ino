@@ -18,11 +18,10 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include <WiFi.h>
-#include <PubSubClient.h>
-#include <PubSubClientTools.h>
-
 #include <Thread.h>             // https://github.com/ivanseidel/ArduinoThread
 #include <ThreadController.h>
+#include <PubSubClient.h>
+#include <PubSubClientTools.h>
 
 #include "conexion.h"
 #include "ota.h"
@@ -48,9 +47,9 @@ WiFiClient espClient;
 PubSubClient cliente_mqtt(tb_host, tb_mqtt_port, espClient);
 PubSubClientTools mqtt(cliente_mqtt);
 
-/* para ejecutar el publicador */
-//ThreadController threadControl = ThreadController();
-//Thread thread = Thread();
+// Utilizar AndroidThread en lugar de FreeRTOS Tasks, por que no es bloqueante.
+ThreadController threadControl = ThreadController();
+Thread thread = Thread();
 
 WebServer servidor(http_service_port);
 
@@ -63,8 +62,8 @@ void setup()
      Serial.begin(SERIAL_BAUDIOS);
      delay(1000);
         
-     Serial.println("INICIANDO:");
-
+     Serial.println("INICIANDO:");     
+     
      // conectar a la red WiFi
      Conexion.begin(ssid, pswd);
 
@@ -77,7 +76,7 @@ void setup()
      
      // configurar el endpoint del servicio Thingsboard
      configurarMQTT();
-
+     
      // lanzar las tareas
      lanzar_tareas();
 }
@@ -90,7 +89,7 @@ void loop()
      if (!cliente_mqtt.loop())
      {
           // reconectar
-          if (cliente_mqtt.connect("MACETA-A", device_token, "", tb_topic, 0, 0, "{'desconexion': 'true'}")) {
+          if (cliente_mqtt.connect("MACETA-A", tb_device_token, "", tb_topic, 0, 0, "{'desconexion': 'true'}")) {
                Serial.println("re-connected");
 		
                mqtt.subscribe(tb_topic,  topic1_subscriber);
@@ -99,7 +98,7 @@ void loop()
           }
           
      }
-     // threadControl.run();
+     threadControl.run();
 };
 
 /* Función que envía el dato formateado en json al servicio de Thingsboard
@@ -110,17 +109,11 @@ void loop()
    enviar el dato.
 */
 const char *enviar_medida(const char *json) {
-     Serial.print("enviar_medida(");
-     Serial.print(json);
-     Serial.println(")");
-     String json_envio = String(json);
-     Serial.println(json_envio);
-     if (cliente_mqtt.publish(tb_topic, json)) {
-          Serial.println(s + "Publicado con éxito (CLI: " + cliente_mqtt.state());
-     } else {
-          Serial.println(s + "No se consiguió publicar (CLI: " + cliente_mqtt.state());
-     }
+     mensaje_mqtt msg {String(json)};
 
+     // los elementos de la cola se copian
+     xQueueSend(queue_mqtt, &msg, QUEUE_MQTT_MAXIMO_TICKS_ESPERA);
+     
      return json;
 }
 
@@ -136,7 +129,7 @@ bool configurarMQTT() {
   /*   At most once (0) */
   /*   At least once (1) */
   /*   Exactly once (2). */
-  if (cliente_mqtt.connect("MACETA-A", device_token, "", tb_topic, 0, 0, "{'desconexion': 'true'}")) {
+  if (cliente_mqtt.connect("MACETA-A", tb_device_token, "", tb_topic, 0, 0, "{'desconexion': 'true'}")) {
     Serial.println("connected");
 		
     mqtt.subscribe(tb_topic,  topic1_subscriber);
@@ -144,17 +137,42 @@ bool configurarMQTT() {
     Serial.println(s+"failed, rc="+cliente_mqtt.state());
   }
 
-  /* // Enable Thread */
-  /* thread.onRun(publisher); */
-  /* thread.setInterval(2000); */
-  /* threadControl.add(&thread);      */
+}
+
+// función que se ejecuta periódicamente, lee la cola de mensajes a publicar y
+// los envía.
+void publicador() {
+     mensaje_mqtt *ptr_msg;
+     String json;
+     
+     // para todos los elementos encolados:
+     for(int i = 0; i<uxQueueMessagesWaiting( queue_mqtt ); i++) {
+          if (xQueueReceive(queue_mqtt, ptr_msg, QUEUE_MQTT_MAXIMO_TICKS_ESPERA)) {
+               json = ptr_msg->mensaje_json;
+          
+               Serial.println(s+"enviar_medida("+json+")");
+     
+               if (cliente_mqtt.publish(tb_topic, json.c_str())) {
+                    Serial.println(s + "Publicado con éxito (CLI: " + cliente_mqtt.state());
+               } else {
+                    Serial.println(s + "No se consiguió publicar (CLI: " + cliente_mqtt.state());
+               }          
+          } else {
+               Serial.println("No se pudo recuperar el mensaje de la cola de mensajes");
+          }
+     }
 }
 
 // Función que lanza las tareas que se encargan de la lectura, obtención de la
 // estructura a enviar y el envío
 void lanzar_tareas() {
      ptr_Tarea sensorHumedad1, sensorHumedad2, sensorPeso,sensorGotas, estadoRele;
- 
+
+     // comprobar estado de la cola MQTT
+     if(queue_mqtt == NULL) {
+          Serial.println("Error creando la cola MQTT.");
+     }
+     
      sensorHumedad1 = new Tarea("sensorHumedad1",
                                 PERIODO_HUMEDAD_1,
                                 PRI_HUMEDAD_1,
@@ -189,4 +207,9 @@ void lanzar_tareas() {
                             leerEstadoRele,
                             json_rele,
                             enviar_medida);
+     
+     // Ejecutar el publicador como AndroidThread por que no hace delay bloqueante.
+     thread.onRun(publicador);
+     thread.setInterval(2000);
+     threadControl.add(&thread);
 }
