@@ -1,4 +1,4 @@
-/* -*- mode: arduino; coding: utf-8-unix -*- */
+/* -*- mode: arduino; coding: utf-8 -*- */
 //
 ////////////////////////////////////////////////////////////////////////////
 // Fichero:    configuracion.h
@@ -11,17 +11,12 @@
 // -------------------------------------------------------------------------
 // Historia: + 23/01/2020 - Primera versión
 ////////////////////////////////////////////////////////////////////////////
-#ifndef CONFIGURACION_HPP
-#define CONFIGURACION_HPP
-
-/* puerto del servidor HTTP */
-int http_service_port = 80;
 
 // velocidad a la que se comunicará con un puerto serie
-const int SERIAL_BAUDIOS = 9600;
+const int SERIAL_BAUDIOS = 115200;
 
 // datos de conexión WiFi ()
 char *ssid = ""; // SSID de la WiFi
 char *pswd = ""; // PASSWORD de la WiFi
 
-#endif
+int http_service_port = 80; // puerto servidor HTTP

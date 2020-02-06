@@ -15,11 +15,11 @@
 #define CONFIG_TB_HPP
 
 // datos de conexión a ThingsBoard
-char *tb_host = "..."; // host en el que se aloja el servicio Thingsboard
+char *tb_host = ""; // host en el que se aloja el servicio Thingsboard
 const int tb_http_port = 80; // puerto en el que se aloja el servicio http de Thingsboard
 const int tb_mqtt_port = 1883; // puerto en el que se envía al servicio mqtt de Thingsboard
 // datos del dispositivo ThingsBoard que recoge las mediciones
-char *device_token = "..."; // token del dispositivo 
-char *autorizacion = "..."; // autorizacion (para lecturas HTTP)
+char *tb_device_token = ""; // token del dispositivo 
 
+char *tb_topic = "v1/devices/me/telemetry";
 #endif
